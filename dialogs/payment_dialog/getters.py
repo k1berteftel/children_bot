@@ -27,7 +27,7 @@ async def choose_payment_type_getter(event_from_user: User, dialog_manager: Dial
     rate = dialog_manager.dialog_data.get('rate')
     rate_name = '"Развивашки"' if rate == 'child' else ('Рецепты' if rate == 'recipe' else '"Развивашки" + рецепты')
     cost = dialog_manager.dialog_data.get('cost')
-    text = f'<blockquote> - Тариф: {rate_name}\n - Сумма к оплате: {cost}</blockquote>'
+    text = f'<blockquote> - Тариф: {rate_name}\n - Сумма к оплате: {cost}₽</blockquote>'
     return {
         'text': text
     }
@@ -66,7 +66,7 @@ async def payment_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dia
 async def process_payment_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
     cost = dialog_manager.dialog_data.get('cost')
     url = dialog_manager.dialog_data.get('url')
-    text = f'<blockquote> - Сумма к оплате: {cost}</blockquote>'
+    text = f'<blockquote> - Сумма к оплате: {cost}₽</blockquote>'
     return {
         'text': text,
         'url': url
