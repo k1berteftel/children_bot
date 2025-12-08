@@ -1,0 +1,12 @@
+aiohttp
+aiogram
+aiogram_dialog
+APScheduler
+asyncpg
+environs
+greenlet
+pydantic
+SQLAlchemy
+pytz
+yookassa-async
+
