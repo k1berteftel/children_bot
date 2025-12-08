@@ -174,9 +174,9 @@ class DataInteraction():
             ))
             await session.commit()
 
-    async def del_deeplink(self, link: str):
+    async def del_deeplink(self, id: int):
         async with self._sessions() as session:
-            await session.execute(delete(DeeplinksTable).where(DeeplinksTable.link == link))
+            await session.execute(delete(DeeplinksTable).where(DeeplinksTable.id == id))
             await session.commit()
 
     async def del_user_sub(self, user_id: int):
