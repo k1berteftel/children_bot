@@ -43,6 +43,8 @@ class adminSG(StatesGroup):
     get_user_data = State()
     choose_rate = State()
 
+    audience_choose = State()
+
 
 class PaymentSG(StatesGroup):
     choose_payment_type = State()

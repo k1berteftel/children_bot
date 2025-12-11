@@ -279,6 +279,11 @@ async def get_mail(msg: Message, widget: MessageInput, dialog_manager: DialogMan
     await dialog_manager.switch_to(adminSG.get_time)
 
 
+async def choose_mail_type(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
+    dialog_manager.dialog_data['users_type'] = clb.data.split('_')[0]
+    await dialog_manager.switch_to(adminSG.get_time)
+
+
 async def get_time(msg: Message, widget: ManagedTextInput, dialog_manager: DialogManager, text: str):
     try:
         time = datetime.strptime(text, '%H:%M %d.%m')
@@ -312,10 +317,18 @@ async def start_malling(clb: CallbackQuery, widget: Button, dialog_manager: Dial
     bot: Bot = dialog_manager.middleware_data.get('bot')
     scheduler: AsyncIOScheduler = dialog_manager.middleware_data.get('scheduler')
     time = dialog_manager.dialog_data.get('time')
+
     keyboard = dialog_manager.dialog_data.get('keyboard')
     if keyboard:
         keyboard = [InlineKeyboardButton(text=i[0], url=i[1]) for i in keyboard]
-    users = await session.get_users()
+
+    users_type = dialog_manager.dialog_data.get('users_type')
+    if users_type == 'all':
+        users = await session.get_users()
+    elif users_type == 'no':
+        users = [user for user in await session.get_users() if not user.sub]
+    else:
+        users = [user for user in await session.get_users() if user.sub]
     if not time:
         if dialog_manager.dialog_data.get('text'):
             text: str = dialog_manager.dialog_data.get('text')

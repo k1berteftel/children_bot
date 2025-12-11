@@ -130,6 +130,16 @@ admin_dialog = Dialog(
         state=adminSG.get_mail
     ),
     Window(
+        Const('Выберите по кому вы будете производить рассылку'),
+        Column(
+            Button(Const('Без подписки'), id='no_mail_choose', on_click=getters.choose_mail_type),
+            Button(Const('С подпиской'), id='subs_mail_choose', on_click=getters.choose_mail_type),
+            Button(Const('По всем'), id='all_mail_choose', on_click=getters.choose_mail_type),
+        ),
+        SwitchTo(Const('Назад'), id='back_get_mail', state=adminSG.get_mail),
+        state=adminSG.audience_choose
+    ),
+    Window(
         Const('Введите дату и время в которое сообщение должно отправиться всем юзерам в формате '
               'час:минута:день:месяц\n Например: 18:00 10.02 (18:00 10-ое февраля)'),
         TextInput(
@@ -137,7 +147,7 @@ admin_dialog = Dialog(
             on_success=getters.get_time
         ),
         SwitchTo(Const('Продолжить без отложки'), id='get_keyboard_switcher', state=adminSG.get_keyboard),
-        SwitchTo(Const('Назад'), id='back_get_mail', state=adminSG.get_mail),
+        SwitchTo(Const('Назад'), id='back_audience_choose', state=adminSG.audience_choose),
         state=adminSG.get_time
     ),
     Window(
