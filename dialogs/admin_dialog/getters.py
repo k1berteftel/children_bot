@@ -1,5 +1,5 @@
 import os
-import datetime
+from datetime import datetime, timedelta
 
 from aiogram import Bot
 from aiogram.types import CallbackQuery, User, Message, FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton
@@ -9,6 +9,7 @@ from aiogram_dialog.widgets.kbd import Button, Select
 from aiogram_dialog.widgets.input import ManagedTextInput, MessageInput
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from utils.schedulers import polling_user_sub
 from utils.build_ids import get_random_id
 from utils.schedulers import send_messages
 from database.action_data_class import DataInteraction
@@ -34,17 +35,17 @@ async def get_static(clb: CallbackQuery, widget: Button, dialog_manager: DialogM
             subs += 1
         for day in range(0, 3):
             #print(user.entry.date(), (datetime.datetime.today() - datetime.timedelta(days=day)).date())
-            if user.entry.date() == (datetime.datetime.today() - datetime.timedelta(days=day)).date():
+            if user.entry.date() == (datetime.today() - timedelta(days=day)).date():
                 if day == 0:
                     entry['today'] = entry.get('today') + 1
                 elif day == 1:
                     entry['yesterday'] = entry.get('yesterday') + 1
                 else:
                     entry['2_day_ago'] = entry.get('2_day_ago') + 1
-        if user.activity.timestamp() > (datetime.datetime.today() - datetime.timedelta(days=1)).timestamp():
+        if user.activity.timestamp() > (datetime.today() - timedelta(days=1)).timestamp():
             activity += 1
     static = await session.get_static()
-    text = (f'<b>Статистика на {datetime.datetime.today().strftime("%d-%m-%Y")}</b>\n\nВсего пользователей: {len(users)}'
+    text = (f'<b>Статистика на {datetime.today().strftime("%d-%m-%Y")}</b>\n\nВсего пользователей: {len(users)}'
             f'\n - Активные пользователи(не заблокировали бота): {active}\n - Пользователей заблокировали '
             f'бота: {len(users) - active}\n - Провзаимодействовали с ботом за последние 24 часа: {activity}\n'
             f' - С подпиской: {subs} \n\n'
@@ -142,17 +143,17 @@ async def deeplink_menu_getter(dialog_manager: DialogManager, **kwargs):
             active += 1
         for day in range(0, 3):
             #print(user.entry.date(), (datetime.datetime.today() - datetime.timedelta(days=day)).date())
-            if user.entry.date() == (datetime.datetime.now() - datetime.timedelta(days=day)).date():
+            if user.entry.date() == (datetime.now() - timedelta(days=day)).date():
                 if day == 0:
                     entry['today'] = entry.get('today') + 1
                 elif day == 1:
                     entry['yesterday'] = entry.get('yesterday') + 1
                 else:
                     entry['2_day_ago'] = entry.get('2_day_ago') + 1
-        if user.activity.timestamp() > (datetime.datetime.today() - datetime.timedelta(days=1)).timestamp():
+        if user.activity.timestamp() > (datetime.today() - timedelta(days=1)).timestamp():
             activity += 1
 
-    text = (f'<b>({deeplink.name}) 🗓 Cоздано: {datetime.datetime.today().strftime("%d-%m-%Y")}</b>\n\nОбщее:\nВсего: {len(users)}'
+    text = (f'<b>({deeplink.name}) 🗓 Cоздано: {datetime.today().strftime("%d-%m-%Y")}</b>\n\nОбщее:\nВсего: {len(users)}'
             f'\n - Активны: {active}\n - Заблокировали бота: {len(users) - active}\n'
             f' - Заходили в бота последние сутки: {activity}\n\nРост:\n - За сегодня: +{entry.get("today")}\n'
             f' - Вчера: +{entry.get("yesterday")}\n - Позавчера: + {entry.get("2_day_ago")}\n\nЗаработано:\n'
@@ -175,6 +176,52 @@ async def del_deeplink(clb: CallbackQuery, widget: Button, dialog_manager: Dialo
     dialog_manager.dialog_data['page'] = 0
     dialog_manager.dialog_data['deeplink_id'] = None
     await dialog_manager.switch_to(adminSG.deeplinks_menu)
+
+
+async def get_user_data(msg: Message, widget: ManagedTextInput, dialog_manager: DialogManager, text: str):
+    session: DataInteraction = dialog_manager.middleware_data.get('session')
+    try:
+        user_id = int(text)
+        user = await session.get_user(user_id)
+    except Exception:
+        if not text.startswith('@'):
+            await msg.answer('Сообщение должно быть числом (Telegram ID) или @username')
+            return
+        user = await session.get_user_by_username(text[1::])
+    if not user:
+        await msg.answer('К сожалению такого пользователя не найденно, пожалуйста попробуйте снова')
+        return
+    dialog_manager.dialog_data['user_id'] = user.user_id
+    await dialog_manager.switch_to(adminSG.choose_rate)
+
+
+async def rate_select(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
+    session: DataInteraction = dialog_manager.middleware_data.get('session')
+    scheduler: AsyncIOScheduler = dialog_manager.middleware_data.get('scheduler')
+    user_id = dialog_manager.dialog_data.get('user_id')
+    rate = clb.data.split('_')[0]
+
+    await session.del_user_sub(user_id)
+    await session.add_user_sub(user_id, 30, rate)
+    job_id = f'polling_sub_{user_id}'
+    job = scheduler.get_job(job_id)
+    if job:
+        job.remove()
+
+    tomorrow = datetime.now() + timedelta(days=1)
+    tomorrow = tomorrow.replace(hour=12, minute=0, second=0, microsecond=0)
+    scheduler.add_job(
+        polling_user_sub,
+        'cron',
+        args=[user_id, clb.bot, session, scheduler],
+        id=job_id,
+        hour=12,
+        minute=0,
+        next_run_time=tomorrow
+    )
+    await clb.message.answer('Подписка была успешно выдана')
+    dialog_manager.dialog_data.clear()
+    await dialog_manager.switch_to(adminSG.start)
 
 
 async def del_admin(clb: CallbackQuery, widget: Select, dialog_manager: DialogManager, item_id: str):
@@ -234,7 +281,7 @@ async def get_mail(msg: Message, widget: MessageInput, dialog_manager: DialogMan
 
 async def get_time(msg: Message, widget: ManagedTextInput, dialog_manager: DialogManager, text: str):
     try:
-        time = datetime.datetime.strptime(text, '%H:%M %d.%m')
+        time = datetime.strptime(text, '%H:%M %d.%m')
     except Exception as err:
         print(err)
         await msg.answer('Вы ввели данные не в том формате, пожалуйста попробуйте снова')
@@ -315,8 +362,8 @@ async def start_malling(clb: CallbackQuery, widget: Button, dialog_manager: Dial
                         print(err)
                         await session.set_active(user.user_id, 0)
     else:
-        date = datetime.datetime.strptime(time, '%H:%M %d.%m')
-        date = date.replace(year=datetime.datetime.today().year)
+        date = datetime.strptime(time, '%H:%M %d.%m')
+        date = date.replace(year=datetime.today().year)
         scheduler.add_job(
             func=send_messages,
             args=[bot, session, InlineKeyboardMarkup(inline_keyboard=[keyboard]) if keyboard else None],

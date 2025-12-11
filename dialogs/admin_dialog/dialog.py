@@ -18,9 +18,29 @@ admin_dialog = Dialog(
             SwitchTo(Const('🔗 Управление диплинками'), id='deeplinks_menu_switcher', state=adminSG.deeplinks_menu),
             SwitchTo(Const('👥 Управление админами'), id='admin_menu_switcher', state=adminSG.admin_menu),
             Button(Const('📋Выгрузка базы пользователей'), id='get_users_txt', on_click=getters.get_users_txt),
+            SwitchTo(Const('Выдать подписку'), id='get_user_data_switcher', state=adminSG.get_user_data),
         ),
         Cancel(Const('Назад'), id='close_admin'),
         state=adminSG.start
+    ),
+    Window(
+        Const('Напишите Telegram ID или юзернейм пользователя (@username)'),
+        TextInput(
+            id='get_user_data',
+            on_success=getters.get_user_data
+        ),
+        SwitchTo(Const('🔙 Назад'), id='back', state=adminSG.start),
+        state=adminSG.get_user_data
+    ),
+    Window(
+        Const('Выберите тариф, который вы хотели бы выдать данному пользователю'),
+        Column(
+            Button(Const('Развивашки'), id='child_rate_choose', on_click=getters.rate_select),
+            Button(Const('Рецепты'), id='recipe_rate_choose', on_click=getters.rate_select),
+            Button(Const('Развивашки + Рецепты'), id='both_rate_choose', on_click=getters.rate_select),
+        ),
+        SwitchTo(Const('🔙 Назад'), id='back_get_user_data', state=adminSG.get_user_data),
+        state=adminSG.choose_rate
     ),
     Window(
         Format('🔗 *Меню управления диплинками*'),

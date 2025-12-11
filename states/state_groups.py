@@ -40,6 +40,9 @@ class adminSG(StatesGroup):
     admin_del = State()
     admin_add = State()
 
+    get_user_data = State()
+    choose_rate = State()
+
 
 class PaymentSG(StatesGroup):
     choose_payment_type = State()
