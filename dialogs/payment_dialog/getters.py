@@ -26,8 +26,14 @@ async def choose_payment_type_getter(event_from_user: User, dialog_manager: Dial
         dialog_manager.dialog_data.update(dialog_manager.start_data)
     rate = dialog_manager.dialog_data.get('rate')
     rate_name = '"Развивашки"' if rate == 'child' else ('Рецепты' if rate == 'recipe' else '"Развивашки" + рецепты')
+    if rate == 'child':
+        rate_description = 'Включает более 50 развивашек за месяц: 2 штуки в день'
+    elif rate == 'recipe':
+        rate_description = 'Включает более 50 рецептов за месяц: 2 штуки в день'
+    else:
+        rate_description = 'Включает более 55 рецептов и более 50 развивашек за месяц'
     cost = dialog_manager.dialog_data.get('cost')
-    text = f'<blockquote> - Тариф: {rate_name}\n - Сумма к оплате: {cost}₽</blockquote>'
+    text = f'<blockquote> - Тариф: {rate_name}\n - ({rate_description})\n - Сумма к оплате: {cost}₽</blockquote>'
     return {
         'text': text
     }
