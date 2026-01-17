@@ -19,8 +19,8 @@ async def menu_getter(event_from_user: User, dialog_manager: DialogManager, **kw
     session: DataInteraction = dialog_manager.middleware_data.get('session')
     scheduler: AsyncIOScheduler = dialog_manager.middleware_data.get('scheduler')
     sub_data = await session.get_user_sub(event_from_user.id)
-    rate_name = '"Развивашки"' if sub_data.rate == 'child' else \
-        ('"Рецепты"' if sub_data.rate == 'recipe' else '"Развивашки" + "Рецепты"')
+    rate_name = '"Развивашки" от логопеда' if sub_data.rate == 'child' else \
+        ('Меню на месяц' if sub_data.rate == 'recipe' else '"Развивашки" + Меню')
     sub_date = datetime.now() + timedelta(days=sub_data.sub_days)
 
     now = datetime.now()

@@ -40,7 +40,8 @@ class DataInteraction():
             await session.execute(insert(UserSubTable).values(
                 user_id=user_id,
                 rate=rate,
-                sub_days=sub_days
+                sub_days=sub_days,
+                days_count=31
             ))
             await session.commit()
 

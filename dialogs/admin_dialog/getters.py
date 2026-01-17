@@ -202,7 +202,7 @@ async def rate_select(clb: CallbackQuery, widget: Button, dialog_manager: Dialog
     rate = clb.data.split('_')[0]
 
     await session.del_user_sub(user_id)
-    await session.add_user_sub(user_id, 30, rate)
+    await session.add_user_sub(user_id, 31, rate)
     job_id = f'polling_sub_{user_id}'
     job = scheduler.get_job(job_id)
     if job:

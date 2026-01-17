@@ -75,7 +75,7 @@ async def execute_rate(user_id: int, currency: int, rate: str, payment_type: str
     elif rate == 'recipe':
         await session.update_static('recipe_buys', 1)
 
-    rate_name = 'Развивашки' if rate == 'child' else ('Рецепты' if rate == 'recipe' else 'Развивашки + Рецепты')
+    rate_name = '"Развивашки" от логопеда' if rate == 'child' else ('Меню на месяц' if rate == 'recipe' else '"Развивашки" + Меню')
     try:
         await bot.send_message(
             chat_id=user_id,

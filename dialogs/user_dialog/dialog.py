@@ -15,8 +15,8 @@ user_dialog = Dialog(
               'В течение 30 дней тебе будут ежедневно приходить по 1-2 развивашки и 2 рецепта, чтобы сделать '
               'твою рутину проще.'),
         Column(
-            Button(Const('Персональные "развивашки"'), id='child_form_switcher', on_click=getters.form_switcher),
-            Button(Const('Индивидуальные рецепты'), id='recipe_form_switcher', on_click=getters.form_switcher),
+            Button(Const('Персональные "Развивашки" от логопеда'), id='child_form_switcher', on_click=getters.form_switcher),
+            Button(Const('Меню на месяц'), id='recipe_form_switcher', on_click=getters.form_switcher),
             Start(Const('Админ панель'), id='admin', state=adminSG.start, when='admin')
         ),
         getter=getters.start_getter,
@@ -96,8 +96,8 @@ user_dialog = Dialog(
     Window(
         Format('{text}'),
         Column(
-            Button(Const('Купить "Развивашки"'), id='child_rate_choose', on_click=getters.rate_choose),
-            Button(Const('🔥"Развивашки" + рецепты'), id='both_rate_choose', on_click=getters.rate_choose),
+            Button(Const('Купить "Развивашки" от логопеда'), id='child_rate_choose', on_click=getters.rate_choose),
+            Button(Const('🔥"Развивашки" + меню'), id='both_rate_choose', on_click=getters.rate_choose),
         ),
         getter=getters.child_rate_choose_getter,
         state=startSG.child_rate_choose
@@ -105,8 +105,8 @@ user_dialog = Dialog(
     Window(
         Format('{text}'),
         Column(
-            Button(Const('Купить рецепты'), id='recipe_rate_choose', on_click=getters.rate_choose),
-            Button(Const('🔥Рецепты + "Развивашки"'), id='both_rate_choose', on_click=getters.rate_choose),
+            Button(Const('Меню на месяц'), id='recipe_rate_choose', on_click=getters.rate_choose),
+            Button(Const('🔥Меню + "Развивашки"'), id='both_rate_choose', on_click=getters.rate_choose),
         ),
         getter=getters.recipe_rate_choose_getter,
         state=startSG.recipe_rate_choose
