@@ -15,7 +15,7 @@ user_dialog = Dialog(
               'В течение 30 дней тебе будут ежедневно приходить по 1-2 развивашки и 2 рецепта, чтобы сделать '
               'твою рутину проще.'),
         Column(
-            Button(Const('Персональные "Развивашки" от логопеда'), id='child_form_switcher', on_click=getters.form_switcher),
+            Button(Const('"Развивашки" от логопеда'), id='child_form_switcher', on_click=getters.form_switcher),
             Button(Const('Меню на месяц'), id='recipe_form_switcher', on_click=getters.form_switcher),
             Start(Const('Админ панель'), id='admin', state=adminSG.start, when='admin')
         ),
